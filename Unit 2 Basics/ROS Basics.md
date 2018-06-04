@@ -30,6 +30,13 @@ int main(int argc, char** argv) { // We start the main C++ program
 ```
 touch launch/my_package_launch_file.launch
 ```
+Launch File
+```
+<launch>
+    <node pkg="my_package" type="simple" name="ObiWan" output="screen"></node>
+</launch>
+
+```
 
 
 ## Modifying the CMakeLists.txt
