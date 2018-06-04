@@ -1,4 +1,4 @@
-# Publishers
+# Sup
 
 ### Simple_Topic_Publisher.CPP
 ```
@@ -41,7 +41,6 @@ int main(int argc, char** argv) {
 add_executable(simple_topic_publisher src/simple_topic_publisher.cpp)
 
 add_dependencies(simple_topic_publisher ${simple_topic_publisher_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 target_link_libraries(simple_topic_publisher
    ${catkin_LIBRARIES}
  )
@@ -147,3 +146,66 @@ target_link_libraries(move_robot_publisher
  ${catkin_LIBRARIES}
 )
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+z
