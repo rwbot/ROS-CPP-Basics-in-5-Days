@@ -111,40 +111,156 @@ target_link_libraries(odom_subscriber
 ```
 
 
+# Publishing a Custom ROS Message
+#### First set up new ROS Msg using the "Create Custom ROS Message" Tutorial
+
+* age_msg_publisher.cpp
+
+```
+#include <ros/ros.h>
+#include <pub_custom_ros_msg/Age.h>
+
+int main(int argc, char** argv){
+
+    ros::init(argc, argv, "publish_age_node");
+    ros::NodeHandle nh;
+
+    ros::Publisher pub = nh.advertise<pub_custom_ros_msg::Age>("age_info", 1000);
+    ros::Rate loop_rate(2);
+
+    pub_custom_ros_msg::Age age;
+    age.years = 5;
+    age.months = 10;
+    age.days = 21;
+
+    while (ros::ok()){
+        pub.publish(age);
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+    return 0;
+}
+```
+
+* age_msg_pub.launch
+
+```
+<launch>
+    <node pkg="pub_custom_ros_msg" type="age_msg_publisher" name="publish_age_node" output="screen">
+    </node>
+</launch>
+```
+
+* CMakeLists.txt
+
+```
+add_executable(age_msg_publisher src/age_msg_publisher.cpp)
+
+# Include Custom Message as Dependency
+add_dependencies(age_msg_publisher pub_custom_ros_msg_generate_messages_cpp)
+
+add_dependencies(age_msg_publisher ${age_msg_publisher_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(age_msg_publisher
+  ${catkin_LIBRARIES}
+)
+```
 
 
 
+# Turtlebot Obstacle Avoidance - Pub, Sub and Msg Project
+
+* brain.cpp
+
+```
+#include <ros/ros.h>
+#include <geometry_msgs/Twist.h>
+#include <sensor_msgs/LaserScan.h>
+
+//Declare variables to store velocity
+float linX, angZ;
+
+//Callback that evaluates the distance from each side of the robot using the LaserScan data
+//and adjust the velocities accordingly
+void laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg){
+
+    //We print the distance to an obstacle in front of the robot
+    ROS_INFO("%f", msg->ranges[360]);
+
+    //If the distance in front > 1 meter, the robot will move forward
+    if (msg->ranges[360] > 1){
+        linX = 0.1;
+        angZ = 0.0;
+    }
+
+    //If the distance in front < 1 meter, the robot will turn left
+    if (msg->ranges[360] < 1){
+        linX = 0.0;
+        angZ = 0.2;
+    }
+
+    //If the distance to left side of < 0.3 meters, the robot will turn right
+    if (msg->ranges[719] < 0.3){
+        linX = 0.0;
+        angZ = -0.2;
+    }
+
+    //If the distance to right side < 0.3 meters, the robot will turn left
+    if (msg->ranges[0] < 0.3){
+        linX = 0.0;
+        angZ = 0.2;
+    }
+}
+
+int main(int argc, char** argv){
+
+    //Initialize a node of name "brain_node"
+    ros::init(argc, argv, "brain_node");
+    ros::NodeHandle nh;
+
+    //Initialize subscriber that subscribes to /kobuki/laser/scan
+    //and calls the laserCallback upon receipt
+    ros::Subscriber sub = nh.subscribe("/kobuki/laser/scan", 1000, laserCallback);
+
+    //Initialize publisher that publishes Twist msgs to the /cmd_vel topic
+    ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
+    ros::Rate loop_rate(2);
+
+    //Declare Twist variable to store velocity
+    geometry_msgs::Twist vel;
 
 
+    while (ros::ok()){
+        //Assign velocities chosen from callback
+        vel.linear.x = linX;
+        vel.angular.z = angZ;
+        //Publishes Twist msg on /cmd_vel topic
+        pub.publish(vel);
 
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
 
+    return 0;
+}
+```
 
+* project.launch
 
+```
+<launch>
+    <node pkg="topics_project_pkg" type="brain" name="brain_node" output="screen"></node>
+</launch>
+```
 
+* CMakeLists.txt
 
+```
+add_executable(brain src/brain.cpp)
 
+add_dependencies(brain ${brain_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-z
+target_link_libraries(brain
+ ${catkin_LIBRARIES}
+)
+```

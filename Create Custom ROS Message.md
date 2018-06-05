@@ -136,5 +136,5 @@ source devel/setup.bash
 6. ##### Use in CPP Files by adding the following to CMakeLists.txt
 
 ```
-add_dependencies(publish_age topic_ex_generate_messages_cpp)
+add_dependencies(CPP_EXECUTABLE PKG_NAME_generate_messages_cpp)
 ```
